@@ -1,0 +1,5 @@
+﻿CREATE TABLE AP.TEST (
+	TEST1 VARCHAR(50)
+);
+
+
