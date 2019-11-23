@@ -7,9 +7,13 @@
 
   <ItemGroup>
     <None Remove="Scripts\Script0001- Init.sql" />
+    <None Remove="Scripts\Script0002- newScript_with_changes.sql" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Scripts\Script0002- newScript_with_changes.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Scripts\Script0001- Init.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>

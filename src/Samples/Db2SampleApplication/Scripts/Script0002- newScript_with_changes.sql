@@ -1,0 +1,3 @@
+﻿
+	    INSERT INTO AP.TEST VALUES('AA');
+        INSERT INTO AP.TEST VALUES('BB');

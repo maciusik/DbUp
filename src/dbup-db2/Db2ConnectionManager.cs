@@ -4,7 +4,7 @@ using System.Text;
 using DbUp.Engine.Transactions;
 using DbUp.Support;
 
-#if NET45
+#if NET451
     using IBM.Data.DB2;
 #endif
 

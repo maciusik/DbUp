@@ -1,14 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Description>DbUp makes it easy to deploy and upgrade SQL Server databases. This package adds DB2 support.</Description>
+    <Title>DbUp DB2 Support</Title>
+    <Authors>Maciej Wajda</Authors>
+    <TargetFrameworks>netstandard2.0;net451</TargetFrameworks>
+    <AssemblyName>dbup-db2</AssemblyName>
+    <AssemblyOriginatorKeyFile>../dbup.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>dbup-db2</PackageId>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net451' ">
+    <DefineConstants>NET451;NETFULL</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="IBM.Data.DB2.Core" Version="1.3.0.100" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net451' ">
+    <PackageReference Include="IBM.Data.DB2" Version="10.0.5.5" />
   </ItemGroup>
 
-
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0'">
+    <DefineConstants>NETCORE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+  </PropertyGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="IBM.Data.DB2.Core" Version="1.3.0.100" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\dbup-core\dbup-core.csproj" />
   </ItemGroup>
