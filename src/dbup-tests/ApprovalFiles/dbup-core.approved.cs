@@ -131,6 +131,7 @@ namespace DbUp.Builder
     {
         public UpgradeEngineBuilder() { }
         public DbUp.Engine.UpgradeEngine Build() { }
+        public DbUp.Builder.UpgradeConfiguration BuildConfiguration() { }
         public void Configure(System.Action<DbUp.Builder.UpgradeConfiguration> configuration) { }
     }
 }
@@ -215,6 +216,8 @@ namespace DbUp.Engine
     {
         public UpgradeEngine(DbUp.Builder.UpgradeConfiguration configuration) { }
         public event System.EventHandler ScriptExecuted;
+        public System.Collections.Generic.List<DbUp.Engine.SqlScript> GetDiscoveredScripts() { }
+        public System.Collections.Generic.List<string> GetExecutedButNotDiscoveredScripts() { }
         public System.Collections.Generic.List<string> GetExecutedScripts() { }
         public System.Collections.Generic.List<DbUp.Engine.SqlScript> GetScriptsToExecute() { }
         public bool IsUpgradeRequired() { }
