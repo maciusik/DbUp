@@ -9,7 +9,6 @@ namespace DbUp.Db2
 {
     public class Db2TableJournal : TableJournal
     {
-        bool journalExists;
         /// <summary>
         /// Creates a new Db2 table journal.
         /// </summary>
