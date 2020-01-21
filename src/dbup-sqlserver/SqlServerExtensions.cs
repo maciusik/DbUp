@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Data.SqlClient;
 using DbUp;
@@ -42,6 +42,23 @@ public static class SqlServerExtensions
     {
         return SqlDatabase(new SqlConnectionManager(connectionString), schema);
     }
+
+#if SUPPORTS_AZURE_AD
+    /// <summary>
+    /// Creates an upgrader for SQL Server databases.
+    /// </summary>
+    /// <param name="supported">Fluent helper type.</param>
+    /// <param name="connectionString">The connection string.</param>
+    /// <param name="schema">The SQL schema name to use. Defaults to 'dbo' if null.</param>
+    /// <param name="useAzureSqlIntegratedSecurity">Whether to use Azure SQL Integrated Security</param>
+    /// <returns>
+    /// A builder for a database upgrader designed for SQL Server databases.
+    /// </returns>
+    public static UpgradeEngineBuilder SqlDatabase(this SupportedDatabases supported, string connectionString, string schema, bool useAzureSqlIntegratedSecurity)
+    {
+        return SqlDatabase(new SqlConnectionManager(connectionString, useAzureSqlIntegratedSecurity), schema);
+    }
+#endif
 
     /// <summary>
     /// Creates an upgrader for SQL Server databases.
@@ -221,33 +238,26 @@ public static class SqlServerExtensions
     {
         GetMasterConnectionStringBuilder(connectionString, logger, out var masterConnectionString, out var databaseName);
 
-        try
-        {
-            using (var connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                if (DatabaseExists(connection, databaseName))
-                    return;
-            }
-        }
-        catch (Exception e)
-        {
-            logger.WriteInformation(@"Database not found on server with connection string in settings: {0}", e.Message);
-        }
-
         using (var connection = new SqlConnection(masterConnectionString))
         {
-            connection.Open();
+            try
+            {
+                connection.Open();
+            }
+            catch (SqlException)
+            {
+                // Failed to connect to master, lets try direct  
+                if (DatabaseExistsIfConnectedToDirectly(logger, connectionString, databaseName))
+                    return;
+
+                throw;
+            }
+
             if (DatabaseExists(connection, databaseName))
                 return;
 
-            var collationString = string.IsNullOrEmpty(collation) ? "" : string.Format(@" COLLATE {0}", collation);
-            var sqlCommandText = string.Format
-                    (
-                        @"create database [{0}]{1}",
-                        databaseName,
-                        collationString
-                    );
+            var collationString = string.IsNullOrEmpty(collation) ? "" : $@" COLLATE {collation}";
+            var sqlCommandText = $@"create database [{databaseName}]{collationString}";
 
             switch (azureDatabaseEdition)
             {
@@ -281,6 +291,23 @@ public static class SqlServerExtensions
             }
 
             logger.WriteInformation(@"Created database {0}", databaseName);
+        }
+    }
+
+    static bool DatabaseExistsIfConnectedToDirectly(IUpgradeLog logger, string connectionString, string databaseName)
+    {
+        try
+        {
+            using (var connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                return DatabaseExists(connection, databaseName);
+            }
+        }
+        catch
+        {
+            logger.WriteInformation("Could not connect to the database directly");
+            return false;
         }
     }
 
