@@ -58,7 +58,9 @@ public static class StandardExtensions
     public static DbUp.Builder.UpgradeEngineBuilder WithScriptsFromFileSystem(this DbUp.Builder.UpgradeEngineBuilder builder, string path, System.Func<string, bool> filter, System.Text.Encoding encoding) { }
     public static DbUp.Builder.UpgradeEngineBuilder WithScriptsFromFileSystem(this DbUp.Builder.UpgradeEngineBuilder builder, string path, System.Func<string, bool> filter, System.Text.Encoding encoding, DbUp.Engine.SqlScriptOptions sqlScriptOptions) { }
     public static DbUp.Builder.UpgradeEngineBuilder WithScriptsFromFileSystem(this DbUp.Builder.UpgradeEngineBuilder builder, string path, DbUp.ScriptProviders.FileSystemScriptOptions options) { }
+    public static DbUp.Builder.UpgradeEngineBuilder WithScriptsFromFileSystem(this DbUp.Builder.UpgradeEngineBuilder builder, string path, DbUp.ScriptProviders.FileSystemScriptOptions options, DbUp.Engine.SqlScriptOptions sqlScriptOptions) { }
     public static DbUp.Builder.UpgradeEngineBuilder WithTransaction(this DbUp.Builder.UpgradeEngineBuilder builder) { }
+    public static DbUp.Builder.UpgradeEngineBuilder WithTransactionAlwaysRollback(this DbUp.Builder.UpgradeEngineBuilder builder) { }
     public static DbUp.Builder.UpgradeEngineBuilder WithTransactionPerScript(this DbUp.Builder.UpgradeEngineBuilder builder) { }
     public static DbUp.Builder.UpgradeEngineBuilder WithVariable(this DbUp.Builder.UpgradeEngineBuilder builder, string variableName, string value) { }
     public static DbUp.Builder.UpgradeEngineBuilder WithVariables(this DbUp.Builder.UpgradeEngineBuilder builder, System.Collections.Generic.IDictionary<string, string> variables) { }
@@ -139,8 +141,11 @@ namespace DbUp.Engine
 {
     public sealed class DatabaseUpgradeResult
     {
+        [System.ObsoleteAttribute()]
         public DatabaseUpgradeResult(System.Collections.Generic.IEnumerable<DbUp.Engine.SqlScript> scripts, bool successful, System.Exception error) { }
+        public DatabaseUpgradeResult(System.Collections.Generic.IEnumerable<DbUp.Engine.SqlScript> scripts, bool successful, System.Exception error, DbUp.Engine.SqlScript errorScript) { }
         public System.Exception Error { get; }
+        public DbUp.Engine.SqlScript ErrorScript { get; }
         public System.Collections.Generic.IEnumerable<DbUp.Engine.SqlScript> Scripts { get; }
         public bool Successful { get; }
     }
@@ -348,6 +353,7 @@ namespace DbUp.Engine.Transactions
         NoTransaction = 0
         SingleTransaction = 1
         TransactionPerScript = 2
+        SingleTransactionAlwaysRollback = 3
     }
 }
 namespace DbUp.Helpers
@@ -404,6 +410,7 @@ namespace DbUp.ScriptProviders
         public string[] Extensions { get; set; }
         public System.Func<string, bool> Filter { get; set; }
         public bool IncludeSubDirectories { get; set; }
+        public bool UseOnlyFilenameForScriptName { get; set; }
     }
     public class FileSystemScriptProvider : DbUp.Engine.IScriptProvider
     {
